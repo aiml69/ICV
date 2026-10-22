@@ -1,13 +1,22 @@
-!pip install ultralytics
-
-
 from ultralytics import YOLO
 import cv2
 import matplotlib.pyplot as plt
-model = YOLO("yolov8n.pt")
-img = cv2.imread("C:/Users/Student/Desktop/an7Z64n_460s.jpg")
-results = model(img)
-output = results[0].plot()
-plt.imshow(cv2.cvtColor(output, cv2.COLOR_BGR2RGB))
-plt.axis("off")
-plt.show()
+
+model = YOLO("yolov8n.pt") # This will download the model the first time it's run
+
+# Ensure the image exists
+image_path = "download.jpeg"
+img_for_check = cv2.imread(image_path)
+
+if img_for_check is None:
+    print(f"Error: Could not load image from {image_path}. Make sure it exists.")
+else:
+    result = model(image_path)[0]
+
+    # The .plot() method returns an image with detections drawn on it
+    img_result = result.plot()
+
+    plt.imshow(cv2.cvtColor(img_result, cv2.COLOR_BGR2RGB))
+    plt.title("YOLOv8 Object Detection")
+    plt.axis("off")
+    plt.show()
