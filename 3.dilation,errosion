@@ -1,0 +1,17 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+img = cv2.imread("C:/Users/Student/Desktop/ICV/images (1).jpg", 0)
+_, binary = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
+k = np.ones((5,5),np.uint8)
+imgs = [binary, cv2.erode(binary,k), cv2.dilate(binary,k),
+ cv2.morphologyEx(binary,cv2.MORPH_OPEN,k),
+ cv2.morphologyEx(binary,cv2.MORPH_CLOSE,k)]
+titles = ["Original","Erosion","Dilation","Opening","Closing"]
+plt.figure(figsize=(10,3))
+for i in range(5):
+ plt.subplot(1,5,i+1)
+ plt.imshow(imgs[i],cmap="gray")
+ plt.title(titles[i])
+ plt.axis("off")
+plt.show()
