@@ -1,20 +1,30 @@
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
-img = cv2.imread(r"C:\Users\Student\Desktop\ICV\sample.jpg")
-gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-rgb = img/255
-R,G,B = rgb[:,:,2],rgb[:,:,1],rgb[:,:,0]
-K = 1-np.max(rgb,axis=2)
-C = np.where(K==1,0,(1-R-K)/(1-K))
-M = np.where(K==1,0,(1-G-K)/(1-K))
-Y = np.where(K==1,0,(1-B-K)/(1-K))
-x=[gray,hsv,C*255,M*255,Y*255,K*255]
-t=["Gray","HSV","Cyan","Magenta","Yellow","Black"]
-plt.figure(figsize=(9,5))
-for i in range(6):
- plt.subplot(2,3,i+1)
- plt.imshow(x[i],cmap="gray")
- plt.title(t[i]); plt.axis("off")
-plt.show()
+
+img = cv2.imread("download.jpeg", 0)
+
+if img is None:
+    print("Error: Could not load image. Make sure 'download.jpeg' exists.")
+else:
+    equal = cv2.equalizeHist(img)
+
+    plt.figure(figsize=(12, 8)) # Increased figure size for 2x2 grid
+
+    plt.subplot(221)
+    plt.imshow(img, cmap="gray")
+    plt.title("Original")
+
+    plt.subplot(222)
+    plt.hist(img.ravel(), 256, [0,256])
+    plt.title("Original Histogram")
+
+    plt.subplot(223)
+    plt.imshow(equal, cmap="gray")
+    plt.title("Equalized")
+
+    plt.subplot(224)
+    plt.hist(equal.ravel(), 256, [0,256])
+    plt.title("Equalized Histogram")
+
+    plt.tight_layout() 
+    plt.show()
