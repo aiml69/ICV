@@ -1,20 +1,57 @@
-!pip install torch torchvision
-
 import torch
 import torchvision
-import cv2
 import matplotlib.pyplot as plt
-model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights="DEFAULT")
+import torchvision.transforms as T
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
+
+model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+    weights="DEFAULT"
+)
+
 model.eval()
-img = cv2.imread("C:/Users/Student/Desktop/an7Z64n_460s.jpg")
-img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-tensor = torchvision.transforms.functional.to_tensor(img)
-with torch.no_grad():
- result = model([tensor])[0]
-for box, score in zip(result["boxes"], result["scores"]):
- if score > 0.5:
- x1,y1,x2,y2 = map(int, box)
- cv2.rectangle(img,(x1,y1),(x2,y2),(255,0,0),2)
-plt.imshow(img)
-plt.axis("off")
-plt.show()
+
+image_path = "download.jpeg"
+
+try:
+    img_pil = Image.open(image_path).convert("RGB")
+except FileNotFoundError:
+    print(f"Error: Could not open image from {image_path}. Make sure it exists.")
+    img_pil = None
+
+if img_pil:
+    x = T.ToTensor()(img_pil)
+
+    with torch.no_grad():
+        result = model([x])[0]
+
+    # Draw bounding boxes and labels on the image
+    draw = ImageDraw.Draw(img_pil)
+
+    try:
+        font = ImageFont.truetype("arial.ttf", 15)
+    except IOError:
+        font = ImageFont.load_default()
+
+    threshold = 0.5 # Confidence threshold for displaying boxes
+
+    for box, score in zip(result["boxes"], result["scores"]):
+        if score > threshold:
+            xmin, ymin, xmax, ymax = box.cpu().numpy()
+            draw.rectangle([(xmin, ymin), (xmax, ymax)], outline="red", width=3)
+            draw.text((xmin, ymin - 15), f"{score:.2f}", fill="red", font=font)
+
+    img_np = np.array(img_pil)
+
+    plt.figure(figsize=(10, 10)) # Adjust figure size for better visibility
+    plt.imshow(img_np)
+    plt.title("Faster R-CNN Detection with Bounding Boxes")
+    plt.axis("off")
+    plt.show()
+
+    print("Detected boxes (raw output):")
+    print(result["boxes"])
+    print("Scores (raw output):")
+    print(result["scores"])
+else:
+    print("Skipping detection due to image loading error.")
